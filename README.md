@@ -2,10 +2,10 @@
 
 ## Installation
 
-Add the gems to you Gemfile:
+Add the gems to your Gemfile:
 
-  gem 'delayed_job', '2.1.0.pre2'
-  gem 'delayed_job_data_mapper', '1.0.0.rc'
+    gem 'delayed_job', '2.1.0.pre2'
+    gem 'delayed_job_data_mapper', '1.0.0.rc'
   
 Add this in an initializer:
 
