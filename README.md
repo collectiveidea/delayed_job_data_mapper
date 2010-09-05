@@ -1,18 +1,15 @@
 # delayed_job DataMapper backend
 
-<pre>
-# config/initializers/delayed_job.rb
-Delayed::Worker.backend = :data_mapper
-Delayed::Worker.backend.auto_upgrade!
-</pre>
+## Installation
 
+Add the gems to you Gemfile:
 
-## Note on Patches/Pull Requests
- 
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+  gem 'delayed_job', '2.1.0.pre2'
+  gem 'delayed_job_data_mapper', '1.0.0.rc'
+  
+Add this in an initializer:
+
+    # config/initializers/delayed_job.rb
+    Delayed::Worker.backend.auto_upgrade!
+
+That's it. Use [delayed_job as normal](http://github.com/collectiveidea/delayed_job).
