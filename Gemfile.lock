@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/collectiveidea/delayed_job.git
-  revision: 0af736eaae22d51c0c1cac1bd487f2c61d327efa
+  revision: a92ee5ced9ebf5f7d54c3042e7a1721f5018d520
   specs:
     delayed_job (2.1.0.pre2)
       activesupport (~> 3.0)
@@ -10,7 +10,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     activesupport (3.0.0)
-    addressable (2.2.0)
+    addressable (2.2.1)
     daemons (1.1.0)
     data_objects (0.10.2)
       addressable (~> 2.1)
