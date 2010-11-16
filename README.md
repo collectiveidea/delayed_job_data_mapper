@@ -7,9 +7,12 @@ Add the gems to your Gemfile:
     gem 'delayed_job', '2.1.0.pre2'
     gem 'delayed_job_data_mapper', '1.0.0.rc'
   
-Add this in an initializer:
+Add this to your environment.rb:
 
-    # config/initializers/delayed_job.rb
-    Delayed::Worker.backend.auto_upgrade!
+    XXX::Application::configure do
+     config.after_initialize do 
+       Delayed::Worker.backend.auto_upgrade!
+     end
+    end
 
 That's it. Use [delayed_job as normal](http://github.com/collectiveidea/delayed_job).
