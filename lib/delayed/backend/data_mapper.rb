@@ -13,7 +13,7 @@ module Delayed
         property :handler,     Text, :lazy => false
         property :run_at,      Time, :index => :run_at_priority
         property :locked_at,   Time, :index => true
-        property :locked_by,   String
+        property :locked_by,   Text
         property :failed_at,   Time
         property :last_error,  Text
                 
