@@ -1,3 +1,4 @@
+# encoding: utf-8
 DataMapper::Resource.class_eval do
   yaml_as "tag:ruby.yaml.org,2002:DataMapper"
 
