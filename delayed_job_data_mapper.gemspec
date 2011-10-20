@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency      'dm-observer'
   s.add_runtime_dependency      'dm-aggregates'
   s.add_runtime_dependency      'delayed_job',  '3.0.0.pre2'
+  s.add_runtime_dependency      'i18n'
   s.add_development_dependency  'rake'
   s.add_development_dependency  'rspec'
   s.add_development_dependency  'dm-migrations'
