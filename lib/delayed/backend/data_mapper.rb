@@ -30,6 +30,8 @@ module Delayed
           simple_conditions[:priority.gte] = Worker.min_priority if Worker.min_priority
           simple_conditions[:priority.lte] = Worker.max_priority if Worker.max_priority
 
+          simple_conditions[:queue] = Worker.queues if Worker.queues.any?
+
           # lockable
           lockable = (
             # not locked or past the max time
