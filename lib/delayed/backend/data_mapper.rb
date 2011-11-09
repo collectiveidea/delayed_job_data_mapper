@@ -19,29 +19,20 @@ module Delayed
         property :last_error,  Text
         property :queue,       String
 
+        before :save, :set_default_run_at
+
         def self.db_time_now
-          Time.now
+          Time.now.utc
         end
 
         def self.find_available(worker_name, limit = 5, max_run_time = Worker.max_run_time)
-          simple_conditions = { :run_at.lte => db_time_now, :limit => limit, :failed_at => nil, :order => [:priority.asc, :run_at.asc]  }
-
-          # respect priorities
+          simple_conditions = {:run_at.lte => db_time_now, :limit => limit, :failed_at => nil, :order => [:priority.asc, :run_at.asc]}
           simple_conditions[:priority.gte] = Worker.min_priority if Worker.min_priority
           simple_conditions[:priority.lte] = Worker.max_priority if Worker.max_priority
-
           simple_conditions[:queue] = Worker.queues if Worker.queues.any?
 
-          # lockable
-          lockable = (
-            # not locked or past the max time
-            ( all(:locked_at => nil ) | all(:locked_at.lt => db_time_now - max_run_time)) |
-
-            # OR locked by our worker
-            all(:locked_by => worker_name))
-
-          # plus some other boring junk
-          (lockable).all( simple_conditions )
+          lockable = ((all(:locked_at => nil) | all(:locked_at.lt => db_time_now - max_run_time)) | all(:locked_by => worker_name))
+          lockable.all(simple_conditions)
         end
 
         # When a worker is exiting, make sure we don't have any locked jobs.
@@ -52,15 +43,13 @@ module Delayed
         # Lock this job for this worker.
         # Returns true if we have the lock, false otherwise.
         def lock_exclusively!(max_run_time, worker = worker_name)
-
           now = self.class.db_time_now
-          overtime = now - max_run_time
 
           # FIXME - this is a bit gross
           # DM doesn't give us the number of rows affected by a collection update
           # so we have to circumvent some niceness in DM::Collection here
           collection = locked_by != worker ?
-            (self.class.all(:id => id, :run_at.lte => now) & ( self.class.all(:locked_at => nil) | self.class.all(:locked_at.lt => overtime) ) ) :
+            (self.class.all(:id => id, :run_at.lte => now) & (self.class.all(:locked_at => nil) | self.class.all(:locked_at.lt => now - max_run_time))) :
             self.class.all(:id => id, :locked_by => worker)
 
           attributes = collection.model.new(:locked_at => now, :locked_by => worker).dirty_attributes
@@ -94,16 +83,6 @@ module Delayed
         def reload(*args)
           reset
           super
-        end
-      end
-
-      class JobObserver
-        include ::DataMapper::Observer
-
-        observe Job
-
-        before :save do
-          self.run_at ||= self.class.db_time_now
         end
       end
     end
