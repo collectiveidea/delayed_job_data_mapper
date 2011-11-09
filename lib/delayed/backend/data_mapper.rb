@@ -24,7 +24,6 @@ module Delayed
         end
 
         def self.find_available(worker_name, limit = 5, max_run_time = Worker.max_run_time)
-
           simple_conditions = { :run_at.lte => db_time_now, :limit => limit, :failed_at => nil, :order => [:priority.asc, :run_at.asc]  }
 
           # respect priorities
@@ -88,6 +87,11 @@ module Delayed
             self[k] = v
           end
           self.save
+        end
+
+        def reload(*args)
+          reset
+          super
         end
       end
 
