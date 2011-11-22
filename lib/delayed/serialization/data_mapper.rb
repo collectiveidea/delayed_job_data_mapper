@@ -4,7 +4,11 @@ if YAML.parser.class.name =~ /syck/i
     yaml_as "tag:ruby.yaml.org,2002:DataMapper"
 
     def self.yaml_new(klass, tag, val)
-      klass.get!(val['attributes']['id'])
+      begin
+        klass.get!(val['attributes']['id'])
+      rescue DataMapper::ObjectNotFoundError
+        raise Delayed::DeserializationError
+      end
     end
 
     def to_yaml_properties
