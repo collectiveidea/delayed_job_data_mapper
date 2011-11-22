@@ -22,7 +22,7 @@ module Delayed
         before :save, :set_default_run_at
 
         def self.db_time_now
-          Time.now.utc
+          Time.now.utc.to_datetime
         end
 
         def self.find_available(worker_name, limit = 5, max_run_time = Worker.max_run_time)
