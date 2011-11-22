@@ -47,9 +47,11 @@ module Delayed
           # FIXME - this is a bit gross
           # DM doesn't give us the number of rows affected by a collection update
           # so we have to circumvent some niceness in DM::Collection here
-          collection = locked_by != worker ?
-            (self.class.all(:id => id, :run_at.lte => now) & (self.class.all(:locked_at => nil) | self.class.all(:locked_at.lt => now - max_run_time))) :
+          collection = if locked_by != worker
+            (self.class.all(:id => id) & (self.class.all(:locked_at => nil) | self.class.all(:locked_at.lt => now - max_run_time)) & self.class.all(:run_at.lte => now))
+          else
             self.class.all(:id => id, :locked_by => worker)
+          end
 
           attributes = collection.model.new(:locked_at => now, :locked_by => worker).dirty_attributes
           affected_rows = self.repository.update(attributes, collection)
