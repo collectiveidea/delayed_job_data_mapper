@@ -1,7 +1,5 @@
 # encoding: utf-8
-require 'dm-core'
-require 'dm-observer'
-require 'dm-aggregates'
+require 'data_mapper'
 require 'delayed_job'
 require 'delayed/serialization/data_mapper'
 require 'delayed/backend/data_mapper'
