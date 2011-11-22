@@ -14,6 +14,7 @@ class Story
   def tell; text; end
   def whatever(n, _); tell*n; end
   def self.count; end
+  def update_attributes(attributes); update(attributes); end
 
   handle_asynchronously :whatever
 end
