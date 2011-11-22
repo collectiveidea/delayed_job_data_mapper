@@ -9,14 +9,14 @@ module Delayed
         storage_names[:default] = 'delayed_jobs'
 
         property :id,          Serial
-        property :priority,    Integer, :default => 0, :index => :run_at_priority
-        property :attempts,    Integer, :default => 0
-        property :handler,     Text, :lazy => false
-        property :run_at,      Time, :index => :run_at_priority
-        property :locked_at,   Time, :index => true
-        property :locked_by,   Text
-        property :failed_at,   Time
-        property :last_error,  Text
+        property :priority,    Integer,   :default => 0,  :index => :run_at_priority
+        property :attempts,    Integer,   :default => 0
+        property :handler,     Text,      :lazy => false
+        property :run_at,      DateTime,  :index => :run_at_priority
+        property :locked_at,   DateTime,  :index => true, :lazy => false
+        property :locked_by,   Text,      :lazy => false
+        property :failed_at,   DateTime,  :lazy => false
+        property :last_error,  Text,      :lazy => false
         property :queue,       String
 
         before :save, :set_default_run_at
