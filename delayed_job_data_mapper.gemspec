@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   s.require_paths     = ['lib']
   s.test_files        = Dir.glob('spec/**/*')
 
-  s.add_runtime_dependency      'delayed_job',  '3.0.0.pre2'
-  s.add_runtime_dependency      'data_mapper'
+  s.add_runtime_dependency      'delayed_job',  '~> 3.0'
+  s.add_runtime_dependency      'dm-core',  '~> 1.0'
   s.add_runtime_dependency      'i18n'
   s.add_runtime_dependency      'tzinfo'
   s.add_development_dependency  'rake'
