@@ -5,15 +5,19 @@ if YAML.parser.class.name =~ /syck/i
 
     def self.yaml_new(klass, tag, val)
       begin
-        klass.get!(val['attributes']['id'])
+        primary_keys = klass.properties.select { |p| p.key? }
+        key_names = primary_keys.map { |p| p.name.to_s }
+        klass.get!(*key_names.map { |k| val[k] })
       rescue DataMapper::ObjectNotFoundError
         raise Delayed::DeserializationError
       end
     end
 
     def to_yaml_properties
-      ['@attributes']
+      primary_keys = self.class.properties.select { |p| p.key? }
+      primary_keys.map { |p| "@#{p.name}" }
     end
+    
   end
 else
   DataMapper::Resource.class_eval do
