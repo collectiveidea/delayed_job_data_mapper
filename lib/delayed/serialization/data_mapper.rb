@@ -17,7 +17,7 @@ if YAML.parser.class.name =~ /syck/i
       primary_keys = self.class.properties.select { |p| p.key? }
       primary_keys.map { |p| "@#{p.name}" }
     end
-    
+
   end
 else
   DataMapper::Resource.class_eval do
