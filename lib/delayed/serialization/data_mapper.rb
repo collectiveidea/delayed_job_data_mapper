@@ -22,7 +22,7 @@ if YAML.parser.class.name =~ /syck/i
 else
   DataMapper::Resource.class_eval do
     def encode_with(coder)
-      coder["attributes"] = @attributes
+      coder["attributes"] = attributes.stringify_keys
       coder.tag = ['!ruby/DataMapper', self.class.name].join(':')
     end
   end
