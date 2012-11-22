@@ -25,13 +25,30 @@ module Delayed
           Time.now.utc.to_datetime
         end
 
+        def self.lockable(worker_name, max_run_time = Worker.max_run_time)
+          all(:failed_at => nil) & (all(:locked_by => worker_name) | expired(max_run_time))
+        end
+
+        def self.expired(max_run_time = Worker.max_run_time)
+          now = db_time_now
+
+          (
+            all(:run_at => nil) |
+            all(:run_at.lte => now)
+          ) &
+          (
+            all(:locked_at => nil) | # never locked
+            all(:locked_at.lt => Time.at(now.to_i - max_run_time.to_i).utc) # expired
+          )
+        end
+
         def self.find_available(worker_name, limit = 5, max_run_time = Worker.max_run_time)
           simple_conditions = {:limit => limit, :order => [:priority.asc, :run_at.asc]}
-          simple_conditions[:priority.gte] = Worker.min_priority if Worker.min_priority
-          simple_conditions[:priority.lte] = Worker.max_priority if Worker.max_priority
+          simple_conditions[:priority.gte] = Worker.min_priority if Worker.min_priority # these seem
+          simple_conditions[:priority.lte] = Worker.max_priority if Worker.max_priority # reversed to me
           simple_conditions[:queue] = Worker.queues if Worker.queues.any?
-          lockable = (all(:run_at.lte => db_time_now) & (all(:locked_at => nil) | all(:locked_at.lt => db_time_now - max_run_time.to_i)) | all(:locked_by => worker_name)) & all(:failed_at => nil)
-          lockable.all(simple_conditions)
+
+          lockable(worker_name, max_run_time).all(simple_conditions)
         end
 
         # When a worker is exiting, make sure we don't have any locked jobs.
@@ -48,7 +65,7 @@ module Delayed
           # DM doesn't give us the number of rows affected by a collection update
           # so we have to circumvent some niceness in DM::Collection here
           collection = if locked_by != worker
-            (self.class.all(:id => id) & (self.class.all(:locked_at => nil) | self.class.all(:locked_at.lt => now - max_run_time.to_i)) & self.class.all(:run_at.lte => now))
+            self.class.all(:id => id) & self.class.expired(max_run_time)
           else
             self.class.all(:id => id, :locked_by => worker)
           end
@@ -63,6 +80,12 @@ module Delayed
           else
             return false
           end
+        end
+
+        def reschedule_at
+          payload_object.respond_to?(:reschedule_at) ?
+            payload_object.reschedule_at(self.class.db_time_now, attempts) :
+            self.class.db_time_now + ((attempts ** 4) + 5).seconds
         end
 
         # these are common to the other backends, so we provide an implementation
@@ -84,6 +107,10 @@ module Delayed
         def reload(*args)
           reset
           super
+        end
+
+        def ==(other)
+          id == other.id
         end
       end
     end
