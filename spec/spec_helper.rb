@@ -14,7 +14,12 @@ class Story
   def tell; text; end
   def whatever(n, _); tell*n; end
   def self.count; end
-  def update_attributes(attributes); update(attributes); end
+  def update_attributes(attributes)
+    attributes.each do |k,v|
+      self[k] = v
+    end
+    self.save
+  end
 
   handle_asynchronously :whatever
 end
