@@ -1,11 +1,10 @@
-# -*- encoding: utf-8 -*-
+# coding: utf-8
 
 Gem::Specification.new do |s|
   s.name              = 'delayed_job_data_mapper'
   s.summary           = 'DataMapper backend for delayed_job'
   s.version           = '1.0.0.rc'
   s.authors           = 'Brandon Keepers'
-  s.date              = Date.today.to_s
   s.email             = 'brandon@collectiveidea.com'
   s.extra_rdoc_files  = ["LICENSE.md", "README.md"]
   s.files             = Dir.glob("{lib,spec}/**/*") + %w[LICENSE.md README.md]
