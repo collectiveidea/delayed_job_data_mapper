@@ -26,26 +26,34 @@ module Delayed
         end
 
         def self.lockable(worker_name, max_run_time = Worker.max_run_time)
-          all(:failed_at => nil) & (all(:locked_by => worker_name) | expired(max_run_time))
+          never_failed &
+          never_run &
+          (locked_by(worker_name) | expired(max_run_time))
         end
 
         def self.expired(max_run_time = Worker.max_run_time)
-          now = db_time_now
-
-          (
-            all(:run_at => nil) |
-            all(:run_at.lte => now)
-          ) &
           (
             all(:locked_at => nil) | # never locked
-            all(:locked_at.lt => Time.at(now.to_i - max_run_time.to_i).utc) # expired
+            all(:locked_at.lt => db_time_now - max_run_time) # lock expired
           )
+        end
+
+        def self.locked_by(worker_name)
+          all(:locked_by => worker_name)
+        end
+
+        def self.never_run
+          (all(:run_at => nil) | all(:run_at.lte => db_time_now))
+        end
+
+        def self.never_failed
+          all(:failed_at => nil)
         end
 
         def self.find_available(worker_name, limit = 5, max_run_time = Worker.max_run_time)
           simple_conditions = {:limit => limit, :order => [:priority.asc, :run_at.asc]}
-          simple_conditions[:priority.gte] = Worker.min_priority if Worker.min_priority # these seem
-          simple_conditions[:priority.lte] = Worker.max_priority if Worker.max_priority # reversed to me
+          simple_conditions[:priority.gte] = Worker.min_priority if Worker.min_priority
+          simple_conditions[:priority.lte] = Worker.max_priority if Worker.max_priority
           simple_conditions[:queue] = Worker.queues if Worker.queues.any?
 
           lockable(worker_name, max_run_time).all(simple_conditions)
@@ -65,20 +73,20 @@ module Delayed
           # DM doesn't give us the number of rows affected by a collection update
           # so we have to circumvent some niceness in DM::Collection here
           collection = if locked_by != worker
-            self.class.all(:id => id) & self.class.expired(max_run_time)
+            self.class.expired(max_run_time).never_run.all(:id => id)
           else
-            self.class.all(:id => id, :locked_by => worker)
+            self.class.locked_by(worker).all(:id => id)
           end
 
           attributes = collection.model.new(:locked_at => now, :locked_by => worker).dirty_attributes
           affected_rows = self.repository.update(attributes, collection)
 
           if affected_rows == 1
-            self.locked_at = now
-            self.locked_by = worker
-            return true
+            reload # pick up the updates above
+            true
           else
-            return false
+            # does this mean > 1 was locked, or none?
+            false
           end
         end
 
