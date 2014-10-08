@@ -6,13 +6,12 @@ Gem::Specification.new do |s|
   s.version           = '1.0.0'
   s.authors           = 'Brandon Keepers'
   s.email             = 'brandon@collectiveidea.com'
-  s.extra_rdoc_files  = ["LICENSE.md", "README.md"]
-  s.files             = Dir.glob("{lib,spec}/**/*") + %w[LICENSE.md README.md]
+  s.extra_rdoc_files  = %w[LICENSE.md README.md]
+  s.files             = %w[LICENSE.md README.md] + Dir['{lib}/**/*']
   s.homepage          = 'http://github.com/collectiveidea/delayed_job_data_mapper'
   s.licenses          = ['MIT']
   s.rdoc_options      = ['--charset=UTF-8']
   s.require_paths     = ['lib']
-  s.test_files        = Dir.glob('spec/**/*')
 
   s.add_runtime_dependency      'delayed_job',  '~> 4.0'
   s.add_runtime_dependency      'dm-core',  '~> 1.0'
